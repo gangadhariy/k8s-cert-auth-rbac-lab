@@ -1,156 +1,79 @@
-# 🚀 Kubernetes User Provisioning CLI Tool
+# Kubernetes User Provisioning CLI Tool
 
-A Python automation tool for Kubernetes user lifecycle management using:
-- OpenSSL (key + CSR generation)
-- Kubernetes CSR API
-- RBAC RoleBinding
-- Inline embedded kubeconfig (portable single file)
+A production-grade Python automation tool to manage Kubernetes users using TLS certificates and RBAC. It automates user creation, deletion, and search with full kubeconfig generation.
 
----
+# Features
+- Create Kubernetes users using CSR workflow
+- Auto-generate private key, CSR, certificate
+- Auto-create RoleBinding for RBAC access
+- Generate fully portable kubeconfig (embedded certificates)
+- Search users (CSR + RoleBindings)
+- Delete users and clean Kubernetes resources
+- Automatic cleanup of temporary files
 
-# 📌 FEATURES
+# Architecture Flow
+User → Private Key → CSR → Kubernetes CSR Approval → Signed Certificate → RoleBinding → kubeconfig → kubectl access
 
-## ✅ CREATE USER
-- Generates private key
-- Creates CSR
-- Submits CSR to Kubernetes
-- Approves CSR
-- Generates signed certificate
-- Creates RoleBinding
-- Generates INLINE kubeconfig (no external dependencies)
-
-## ❌ DELETE USER
-- Deletes CSR
-- Deletes RoleBinding
-- Deletes local kubeconfig file
-
-## 🔍 SEARCH USERS
-- Lists CSRs
-- Lists RoleBindings across namespaces
-
----
-
-# ⚙️ PREREQUISITES
-
+# Prerequisites
 python3 --version  
 kubectl version --client  
 openssl version  
 
----
+pip install pyyaml  
 
-# 🐍 PYTHON SETUP
-
+# Setup
 python3 -m venv venv  
 source venv/bin/activate  
 pip install pyyaml  
 
----
-
-# 🚀 USAGE
-
-# =========================
 # CREATE USER
-# =========================
-
 python3 k8s_user_provisioner.py create \
   --username auto-user \
   --role auto-user-role \
   --kubeconfig /home/ubuntu/.kube/config \
   --namespace auto-user \
-  --server https://172.31.17.151:6443
+  --server https://172.31.17.151:6443  
 
----
-
-# =========================
 # USE GENERATED KUBECONFIG
-# =========================
-
 export KUBECONFIG=auto-user.kubeconfig  
 kubectl get pods  
 kubectl get ns  
 
----
-
-# =========================
 # DELETE USER
-# =========================
-
 python3 k8s_user_provisioner.py delete \
   --username auto-user \
   --kubeconfig /home/ubuntu/.kube/config \
   --namespace auto-user  
 
----
-
-# =========================
 # SEARCH USERS
-# =========================
-
 python3 k8s_user_provisioner.py search \
   --kubeconfig /home/ubuntu/.kube/config  
 
----
-
-# 📂 OUTPUT FILES
-
-After successful creation:
-
+# OUTPUT FILES
 auto-user.key  
 auto-user.csr  
 auto-user.crt  
 auto-user.kubeconfig  
 
----
+FINAL FILE TO SHARE:
+auto-user.kubeconfig  
 
-# 🔐 IMPORTANT NOTES
-
-✔ kubeconfig is INLINE embedded (portable)  
-✔ No dependency on external .crt or .key files  
-✔ Works on any machine  
-
----
-
-# ⚠️ RBAC RULES
-
+# RBAC RULES
 Use full Kubernetes resource names:
+pods, services, deployments  
+NOT svc, po, deploy  
 
-✔ pods  
-✔ services  
-✔ deployments  
-
-NOT:
-✘ svc  
-✘ po  
-✘ deploy  
-
----
-
-# 🧪 TROUBLESHOOTING
-
+# TROUBLESHOOTING
 kubectl get csr  
 kubectl certificate approve <name>  
-
 kubectl get rolebinding -A  
-
 kubectl config view  
+kubectl cluster-info  
 
----
-
-# 🧠 ARCHITECTURE FLOW
-
-User → CSR → Kubernetes Approval → Certificate  
-→ RoleBinding → kubeconfig generation → kubectl access  
-
----
-
-# 🚀 EXAMPLE WORKFLOW
-
-python3 script.py create ...  
+# EXAMPLE WORKFLOW
+python3 k8s_user_provisioner.py create ...  
 export KUBECONFIG=auto-user.kubeconfig  
 kubectl get pods  
 
----
-
-# 👨‍💻 AUTHOR
-
+# AUTHOR
 Kubernetes Automation CLI Tool
